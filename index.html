@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dutch Oven Coal Chart</title>
+<meta name="description" content="How many charcoal briquettes to put on top of and under a camp Dutch oven to reach a given temperature.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Palette from ~/Library/Colors/Scouts.clr */
+  :root {
+    --scouting-blue: #003F87;
+    --dark-blue: #003366;
+    --pale-blue: #9AB3D5;
+    --gold: #FFCE04;
+    --lion: #F7C02F;
+    --tiger: #E87E3E;
+    --wolf: #D73638;
+    --red: #CE1126;
+    --tan: #D6CEBD;
+    --light-tan: #E9E9E4;
+    --dark-tan: #AD9D7B;
+    --olive: #243E2C;
+    --warm-gray: #515354;
+    --dark-gray: #232528;
+
+    --bg: var(--light-tan);
+    --surface: #FFFFFF;
+    --text: var(--dark-gray);
+    --muted: var(--warm-gray);
+    --rule: var(--tan);
+    --coal: var(--dark-gray);
+    --coal-text: #FFFFFF;
+    --pot-border: var(--dark-gray);
+    --header-bg: var(--dark-blue);
+    --header-text: #FFFFFF;
+    --accent: var(--gold);
+    --link: var(--scouting-blue);
+
+    --band-low: var(--dark-tan);
+    --band-medium: var(--lion);
+    --band-hot: var(--tiger);
+    --band-very-hot: var(--wolf);
+    --band-low-tint: #F1ECE2;
+    --band-medium-tint: #FEF5DA;
+    --band-hot-tint: #FCE8DC;
+    --band-very-hot-tint: #F9DEDE;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15171A;
+      --surface: var(--dark-gray);
+      --text: #F2F0EA;
+      --muted: #B9B6AE;
+      --rule: #3A3D41;
+      --coal: #0E0F10;
+      --pot-border: #C9C4B8;
+      --header-bg: #0B1E3A;
+      --link: var(--pale-blue);
+      --band-low-tint: #2E2B25;
+      --band-medium-tint: #352E14;
+      --band-hot-tint: #3A2618;
+      --band-very-hot-tint: #3D1C1D;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.45;
+  }
+
+  header {
+    background: var(--header-bg);
+    color: var(--header-text);
+    padding: 2rem 16px 1.75rem;
+    text-align: center;
+    border-bottom: 6px solid var(--accent);
+  }
+  header .kicker {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--pale-blue);
+    font-size: .9rem;
+  }
+  h1 {
+    margin: .15em 0 .2em;
+    font-family: "Alfa Slab One", Rockwell, "Roboto Slab", Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(2.2rem, 7vw, 3.6rem);
+    line-height: 1;
+    color: var(--gold);
+    letter-spacing: .02em;
+  }
+  header p.lede {
+    margin: .5rem auto 0;
+    max-width: 36rem;
+    font-size: 1.05rem;
+  }
+
+  main {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 1.5rem 16px 2rem;
+  }
+
+  /* ---------- Legend ---------- */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .legend .key {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: .25rem .75rem;
+    align-items: center;
+  }
+  .legend .key .oven { font-size: 1.15rem; grid-row: span 3; }
+  .legend .key span.lbl { font-size: .95rem; }
+  .legend .key span.lbl b { font-weight: 700; }
+  .bands {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem .9rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: .95rem;
+  }
+  .bands li { display: flex; align-items: center; gap: .4rem; }
+  .swatch {
+    width: 1.1rem; height: 1.1rem;
+    border-radius: 3px;
+    border: 1.5px solid var(--pot-border);
+    display: inline-block;
+  }
+
+  /* ---------- Chart table ---------- */
+  .chart-wrap {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  caption {
+    caption-side: top;
+    text-align: left;
+    padding: .75rem 1rem;
+    font-weight: 700;
+    border-bottom: 1px solid var(--rule);
+  }
+  thead th {
+    padding: .75rem .25rem .6rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    border-bottom: 2px solid var(--pot-border);
+  }
+  thead th small {
+    display: block;
+    font-weight: 400;
+    font-size: .8rem;
+    color: var(--muted);
+  }
+  thead th:first-child { width: 22%; }
+  tbody th {
+    text-align: left;
+    padding: .5rem .5rem .5rem .9rem;
+    border-left: 10px solid var(--band);
+    white-space: nowrap;
+  }
+  tbody th .temp {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  tbody th .band {
+    display: block;
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+  }
+  tbody tr { background: var(--tint); }
+  tbody tr + tr { border-top: 1px solid var(--rule); }
+  tbody tr.band-start { border-top: 2px solid var(--pot-border); }
+  td { text-align: center; padding: .6rem .2rem; }
+
+  tr.low      { --band: var(--band-low);       --tint: var(--band-low-tint); }
+  tr.medium   { --band: var(--band-medium);    --tint: var(--band-medium-tint); }
+  tr.hot      { --band: var(--band-hot);       --tint: var(--band-hot-tint); }
+  tr.very-hot { --band: var(--band-very-hot);  --tint: var(--band-very-hot-tint); }
+
+  /* Hover highlighting of row and column */
+  @media (hover: hover) {
+    tbody tr:hover td, tbody tr:hover th { background: color-mix(in srgb, var(--band) 22%, transparent); }
+    td:hover .oven .pot { outline: 3px solid var(--scouting-blue); outline-offset: 2px; }
+  }
+
+  /* ---------- Oven glyph: lid coals / pot total / bottom coals ---------- */
+  .oven {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    font-variant-numeric: tabular-nums;
+    font-size: 1rem;
+  }
+  .oven .coals {
+    min-width: 2.2em;
+    padding: .05em .45em;
+    border-radius: 999px;
+    background: var(--coal);
+    color: var(--coal-text);
+    font-weight: 700;
+    font-size: .8em;
+    line-height: 1.35;
+  }
+  .oven .coals.top { position: relative; margin-bottom: -2px; z-index: 1; }
+  .oven .pot {
+    min-width: 3.2em;
+    padding: .05em .4em .1em;
+    border: 3px solid var(--pot-border);
+    border-top-width: 5px;
+    border-radius: .2em .2em .9em .9em;
+    background: var(--surface);
+    font-weight: 700;
+    font-size: 1.55em;
+    line-height: 1.1;
+    position: relative;
+  }
+  /* little legs */
+  .oven .pot::before, .oven .pot::after {
+    content: "";
+    position: absolute;
+    bottom: -7px;
+    width: 4px; height: 6px;
+    background: var(--pot-border);
+  }
+  .oven .pot::before { left: 22%; }
+  .oven .pot::after  { right: 22%; }
+  .oven .coals.bottom { margin-top: 8px; }
+
+  /* ---------- Notes ---------- */
+  .notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 6px solid var(--accent);
+    border-radius: 8px;
+    padding: .9rem 1rem;
+  }
+  .note h2 { font-size: 1.05rem; margin: 0 0 .3rem; }
+  .note p { margin: 0; }
+
+  footer {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 0 16px 2.5rem;
+    color: var(--muted);
+    font-size: .95rem;
+  }
+  footer a { color: var(--link); word-break: break-word; }
+
+  /* ---------- Picker ---------- */
+  .calc {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .calc h2 { margin: 0 0 .75rem; font-size: 1.2rem; }
+  .calc fieldset { border: 0; margin: 0 0 1rem; padding: 0; min-width: 0; }
+  .calc legend { font-weight: 700; margin-bottom: .4rem; padding: 0; }
+  .choices { display: grid; gap: .5rem; }
+  .choices.sizes { grid-template-columns: repeat(4, 1fr); }
+  .choices.temps { grid-template-columns: repeat(6, 1fr); }
+  .choices input {
+    position: absolute;
+    opacity: 0;
+    width: 1px; height: 1px;
+  }
+  .choices label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.6rem;
+    padding: .4rem .2rem;
+    border: 2px solid var(--rule);
+    border-radius: 10px;
+    background: var(--bg);
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+  }
+  .choices label b { font-size: 1.25rem; }
+  .choices label small { font-size: .8rem; color: var(--muted); }
+  .choices.temps label { border-bottom: 6px solid var(--band); }
+  .choices.temps label b { font-size: 1.1rem; }
+  .choices input:checked + label {
+    background: var(--scouting-blue);
+    border-color: var(--scouting-blue);
+    color: #fff;
+  }
+  .choices.temps input:checked + label { border-bottom-color: var(--band); }
+  .choices input:checked + label small { color: var(--pale-blue); }
+  .choices input:focus-visible + label { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .choices .low      { --band: var(--band-low); }
+  .choices .medium   { --band: var(--band-medium); }
+  .choices .hot      { --band: var(--band-hot); }
+  .choices .very-hot { --band: var(--band-very-hot); }
+  .size-note { margin: .4rem 0 0; font-size: .85rem; color: var(--muted); }
+
+  .result {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    border-radius: 10px;
+    background: var(--tint);
+    border-left: 10px solid var(--band);
+  }
+  .result.low      { --band: var(--band-low);       --tint: var(--band-low-tint); }
+  .result.medium   { --band: var(--band-medium);    --tint: var(--band-medium-tint); }
+  .result.hot      { --band: var(--band-hot);       --tint: var(--band-hot-tint); }
+  .result.very-hot { --band: var(--band-very-hot);  --tint: var(--band-very-hot-tint); }
+  .result .oven { font-size: 1.7rem; }
+  .result dl { margin: 0; display: grid; grid-template-columns: auto auto; gap: .1rem .6rem; align-items: baseline; }
+  .result dt { font-size: 1.6rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+  .result dd { margin: 0; }
+  .result .ctx { grid-column: 1 / -1; margin-top: .35rem; color: var(--muted); font-size: .9rem; }
+
+  .chart-link { display: inline-block; margin-top: .9rem; font-weight: 600; color: var(--link); }
+  .back-link { display: none; }
+
+  /* ---------- Small screens ---------- */
+  @media (max-width: 640px) {
+    .choices.temps { grid-template-columns: repeat(3, 1fr); }
+    /* On phones the full chart is tucked away behind a link */
+    .full-chart { display: none; }
+    .full-chart:target { display: block; }
+    .back-link { display: inline-block; margin: 0 0 .75rem; font-weight: 600; color: var(--link); }
+  }
+  @media (max-width: 560px) {
+    header { padding-top: 1.5rem; }
+    thead th:first-child { width: 24%; }
+    thead th { font-size: .95rem; }
+    tbody th { padding: .4rem .3rem .4rem .45rem; border-left-width: 6px; }
+    tbody th .temp { font-size: 1rem; }
+    tbody th .band { font-size: .62rem; letter-spacing: .04em; }
+    td { padding: .5rem 0; }
+    .oven { font-size: .82rem; }
+    .oven .pot { min-width: 2.7em; padding: 0 .25em .05em; border-width: 2px; border-top-width: 4px; }
+  }
+  @media (max-width: 360px) {
+    .oven { font-size: .72rem; }
+  }
+
+  /* ---------- Print: black & white friendly ---------- */
+  @media print {
+    @page { size: letter portrait; margin: .5in; }
+    :root {
+      --bg: #fff; --surface: #fff; --text: #000; --muted: #333;
+      --rule: #999; --pot-border: #000; --coal: #fff; --coal-text: #000;
+      --band-low-tint: #fff; --band-medium-tint: #fff;
+      --band-hot-tint: #fff; --band-very-hot-tint: #fff;
+    }
+    body { font-size: 11pt; }
+    .calc, .back-link { display: none !important; }
+    .full-chart { display: block !important; }
+    header {
+      background: none; color: #000;
+      border-bottom: 3px solid #000;
+      padding: 0 0 .35rem;
+    }
+    header .kicker { color: #000; }
+    h1 { color: #000; font-size: 2.2rem; }
+    header p.lede { font-size: 10pt; margin-top: .2rem; }
+    main { max-width: none; padding: .5rem 0 0; }
+    .legend { padding: .4rem; margin-bottom: .5rem; }
+    .legend .key .oven { font-size: .95rem; }
+    caption { padding: .35rem .75rem; }
+    thead th { padding: .35rem .25rem; }
+    tbody th { padding: .2rem .5rem; }
+    .oven { font-size: .8rem; }
+    .note p { font-size: 10pt; }
+    .notes { margin-top: .5rem; gap: .5rem; }
+    .note { padding: .5rem .75rem; }
+    .legend, .chart-wrap, .note { border-color: #000; break-inside: avoid; }
+    .note { border-left-width: 3px; border-left-color: #000; }
+    .chart-wrap { border-radius: 0; }
+    td { padding: .1rem 0; }
+    .oven .coals { border: 1.5px solid #000; }
+    /* Heat bands become a grayscale ramp so they still read without color */
+    tr.low      { --band: #ddd; }
+    tr.medium   { --band: #aaa; }
+    tr.hot      { --band: #666; }
+    tr.very-hot { --band: #000; }
+    tbody th { border-left-width: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .swatch { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .swatch.low { background: #ddd !important; }
+    .swatch.medium { background: #aaa !important; }
+    .swatch.hot { background: #666 !important; }
+    .swatch.very-hot { background: #000 !important; }
+    footer { padding: .4rem 0 0; color: #000; font-size: 9pt; }
+    footer p { margin: 0; }
+    footer a { color: #000; text-decoration: none; }
+    footer a::after { content: " — " attr(href); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="kicker">Camp Dutch Oven</p>
+  <h1>Coal Chart</h1>
+  <p class="lede">How many charcoal briquettes you need on the lid and underneath to hold a given temperature.</p>
+</header>
+
+<main>
+  <section class="calc" id="calc" aria-labelledby="calc-title">
+    <h2 id="calc-title">How many coals do I need?</h2>
+    <fieldset>
+      <legend>Oven size</legend>
+      <div class="choices sizes" id="size-choices"></div>
+      <p class="size-note">Capacities are for standard-depth camp ovens. If yours is a deep oven, go by its diameter.</p>
+    </fieldset>
+    <fieldset>
+      <legend>Temperature</legend>
+      <div class="choices temps" id="temp-choices"></div>
+    </fieldset>
+    <div class="result" id="result" aria-live="polite"></div>
+    <a class="chart-link" href="#full-chart">See the whole chart →</a>
+  </section>
+
+  <section class="full-chart" id="full-chart" aria-label="Full coal chart">
+  <a class="back-link" href="#calc">← Back to the picker</a>
+  <section class="legend" aria-label="How to read the chart">
+    <div class="key">
+      <span class="oven" aria-hidden="true">
+        <span class="coals top">14</span>
+        <span class="pot">21</span>
+        <span class="coals bottom">7</span>
+      </span>
+      <span class="lbl"><b>14</b> coals on top (lid)</span>
+      <span class="lbl"><b>21</b> total coals needed</span>
+      <span class="lbl"><b>7</b> coals underneath</span>
+    </div>
+    <ul class="bands" aria-label="Heat ranges">
+      <li><span class="swatch low" style="background:var(--band-low)"></span>Low</li>
+      <li><span class="swatch medium" style="background:var(--band-medium)"></span>Medium</li>
+      <li><span class="swatch hot" style="background:var(--band-hot)"></span>Hot</li>
+      <li><span class="swatch very-hot" style="background:var(--band-very-hot)"></span>Very Hot</li>
+    </ul>
+  </section>
+
+  <div class="chart-wrap">
+    <table>
+      <caption>Briquettes by oven diameter and target temperature</caption>
+      <thead>
+        <tr>
+          <th scope="col">Temp</th>
+          <th scope="col">8″<small>2 qt · 1.9 L</small></th>
+          <th scope="col">10″<small>4 qt · 3.8 L</small></th>
+          <th scope="col">12″<small>6 qt · 5.7 L</small></th>
+          <th scope="col">14″<small>8 qt · 7.6 L</small></th>
+        </tr>
+      </thead>
+      <tbody id="chart"></tbody>
+    </table>
+  </div>
+  </section>
+
+  <div class="notes">
+    <div class="note">
+      <h2>Using the chart</h2>
+      <p>Find your oven size and target temperature. Place the top number of coals on the lid and the bottom number underneath the oven.</p>
+    </div>
+    <div class="note">
+      <h2>Simmering</h2>
+      <p>Simmering is cooking just below the boiling point, between 185&nbsp;°F and 201&nbsp;°F.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>Source: Lodge Cast Iron, <a href="https://www.lodgecastiron.com/blogs/story/how-many-coals-use-when-cooking-with-a-camp-dutch-oven"><cite>How Many Coals to Use When Cooking with a Camp Dutch Oven</cite></a>.</p>
+</footer>
+
+<script>
+  // [temp °F, heat band, [top, bottom] for 8", 10", 12", 14" ovens]
+  const DATA = [
+    [450, "Very Hot", [[14, 6], [19, 10], [22, 11], [26, 14]]],
+    [425, "Hot",      [[13, 6], [18, 9],  [21, 10], [25, 13]]],
+    [400, "Medium",   [[12, 6], [17, 8],  [19, 10], [24, 12]]],
+    [375, "Medium",   [[11, 6], [16, 7],  [18, 9],  [22, 12]]],
+    [350, "Low",      [[11, 5], [14, 7],  [17, 8],  [21, 11]]],
+    [325, "Low",      [[10, 5], [13, 6],  [16, 7],  [20, 10]]],
+  ];
+  // diameter (in), capacity (qt) of standard-depth camp ovens
+  const SIZES = [
+    { inches: 8,  quarts: 2 },
+    { inches: 10, quarts: 4 },
+    { inches: 12, quarts: 6 },
+    { inches: 14, quarts: 8 },
+  ];
+  const liters = (qt) => (qt * 0.946).toFixed(1);
+  const bandClass = (band) => band.toLowerCase().replace(" ", "-");
+
+  const tbody = document.getElementById("chart");
+  let prevBand = null;
+  for (const [temp, band, cells] of DATA) {
+    const tr = document.createElement("tr");
+    tr.className = bandClass(band);
+    if (prevBand && band !== prevBand) tr.classList.add("band-start");
+    prevBand = band;
+
+    const th = document.createElement("th");
+    th.scope = "row";
+    th.innerHTML = `<span class="temp">${temp}&nbsp;°F</span><span class="band">${band}</span>`;
+    tr.appendChild(th);
+
+    cells.forEach(([top, bottom], i) => {
+      const td = document.createElement("td");
+      const total = top + bottom;
+      td.innerHTML =
+        `<span class="oven" role="img" aria-label="${SIZES[i].inches}-inch oven at ${temp} °F: ${total} coals, ${top} on top and ${bottom} underneath">` +
+        `<span class="coals top">${top}</span><span class="pot">${total}</span><span class="coals bottom">${bottom}</span></span>`;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  }
+
+  // ---------- Picker ----------
+  const sizeBox = document.getElementById("size-choices");
+  const tempBox = document.getElementById("temp-choices");
+  const result = document.getElementById("result");
+
+  SIZES.forEach(({ inches, quarts }, i) => {
+    sizeBox.insertAdjacentHTML("beforeend",
+      `<input type="radio" name="size" id="size-${inches}" value="${i}">` +
+      `<label for="size-${inches}"><b>${inches}″</b><small>${quarts} qt · ${liters(quarts)} L</small></label>`);
+  });
+  // Lowest temperature first reads more naturally in a picker
+  [...DATA].reverse().forEach(([temp, band]) => {
+    const row = DATA.findIndex(([t]) => t === temp);
+    tempBox.insertAdjacentHTML("beforeend",
+      `<input type="radio" name="temp" id="temp-${temp}" value="${row}">` +
+      `<label for="temp-${temp}" class="${bandClass(band)}"><b>${temp}°F</b><small>${band}</small></label>`);
+  });
+
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem("coal-picker")) || {}; } catch (e) {}
+  const initSize = SIZES.findIndex((s) => s.inches === saved.inches);
+  const initTemp = DATA.findIndex(([t]) => t === saved.temp);
+  sizeBox.querySelectorAll("input")[initSize >= 0 ? initSize : 2].checked = true;   // 12″
+  document.getElementById(`temp-${initTemp >= 0 ? saved.temp : 350}`).checked = true;
+
+  function update() {
+    const s = +sizeBox.querySelector("input:checked").value;
+    const r = +tempBox.querySelector("input:checked").value;
+    const [temp, band, cells] = DATA[r];
+    const [top, bottom] = cells[s];
+    const { inches, quarts } = SIZES[s];
+    result.className = `result ${bandClass(band)}`;
+    result.innerHTML =
+      `<span class="oven" aria-hidden="true"><span class="coals top">${top}</span>` +
+      `<span class="pot">${top + bottom}</span><span class="coals bottom">${bottom}</span></span>` +
+      `<dl><dt>${top}</dt><dd>on the lid</dd><dt>${bottom}</dt><dd>underneath</dd>` +
+      `<dt>${top + bottom}</dt><dd>total coals</dd>` +
+      `<dd class="ctx">${inches}″ (${quarts} qt) oven at ${temp}&nbsp;°F · ${band}</dd></dl>`;
+    try { localStorage.setItem("coal-picker", JSON.stringify({ inches, temp })); } catch (e) {}
+  }
+  sizeBox.addEventListener("change", update);
+  tempBox.addEventListener("change", update);
+  update();
+</script>
+</body>
+</html>
